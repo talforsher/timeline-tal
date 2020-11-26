@@ -1,6 +1,8 @@
 const container = document.getElementById("container")
 const timeline = document.getElementById("timeline")
 const plus = document.querySelectorAll(".plus")
+const carouselInner = document.querySelector(".carousel-inner")
+
 var img = ""
 var pass = ""
 
@@ -10,6 +12,17 @@ const DB = {
 }
 var data = {}
 let data_num = 0
+
+function createCarouselItem(url){
+  const carouselItem = document.createElement("div")
+  carouselItem.classList = "item"
+  carouselItem.innerHTML = 
+  `<img src="${url}" alt="...">
+  <div class="carousel-caption">
+  <img src="buttons/plus.svg" alt="plus" class="plus" data-src="${url}">
+  </div>`
+  return carouselItem
+}
 
 function fetchData() {
   return fetch(`${DB.root}/b/5fbcf5b94f12502c21d7e698/latest`, {
@@ -96,6 +109,8 @@ function addNowToDOM(data) {
 }
 
 window.addEventListener("load", () => {
+  const storage = firebase.storage()
+  const ref = storage.ref().child("res")
   fetchData()
     .then(res => {
       data = res.data
@@ -112,7 +127,13 @@ window.addEventListener("load", () => {
 
       getData()
     })
-
+    ref.listAll().then(res=>res.items.forEach(
+      el=>el.getDownloadURL()
+      .then(url=>{
+        carouselInner.append(createCarouselItem(url))
+      }
+        )
+      ))
   plus.forEach(e => {
     e.addEventListener("click", plusToggle)
   })
