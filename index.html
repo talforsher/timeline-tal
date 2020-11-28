@@ -3,9 +3,10 @@
 <html lang="en">
 
 <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+
 <head>
   <meta charset="utf-8">
-  <meta name="google-site-verification" content="m-XFmXWqLD028k8E_Ts4q4yvRIsCPkzwYVHKuDuwVPU" />
+  <meta name="google-site-verification" content="VBI1GD6q2PrJ8JejrgNOuRtAOOGRDjqu5dqfMNW7xZk" />
   <title>קו החיים של טל פורשר</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Timeline with infinite scroll effect.">
@@ -15,7 +16,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Varela+Round&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href="css/style.css">
-
 </head>
 
 <body>
@@ -27,16 +27,12 @@
       <button class="add-button">&darr;הוספת סיפור&darr;</button>
       <div class="add-image" style="display: none;">
         <h3>בחרו תמונה - לחצו על צידי תמונה כדי לעבור הלאה או העלו תמונה מהמכשיר שלכם</h3>
-        <input type="file" name="file" id="file"> 
+        <label for="file">העלאת תמונה מהמכשיר:</label>
+        <input type="file" name="file" id="file" style="width: inherit;">
+        <div id="progress"></div>
         <div id="carousel-example-generic" class="carousel slide" data-interval="false">
           <!-- Wrapper for slides -->
           <div class="carousel-inner" role="listbox">
-            <div class="item active">`
-              <img src="https://drive.google.com/uc?export=view&id=1miTXHw733d0mNgoOSxoG_iz3tx2j9Jwo" alt="...">
-              <div class="carousel-caption">
-                <img src="buttons/vee.svg" alt="plus" class="plus" data-src="https://zivi-tl.surge.sh/img1.jpg">
-              </div>
-            </div>
           </div>
 
           <!-- Controls -->
@@ -60,7 +56,7 @@
             <div class="preview-content">
               <p class="preview-date"></p>
               <p class="preview-text">סיפור</p>
-              <img class="preview" src="https://zivi-tl.surge.sh/img/img1.jpg" alt="" />
+              <img class="preview" src="" alt="" />
             </div>
           </div>
         </div>
@@ -69,10 +65,12 @@
   </header>
 
   <div class="begin-container">
-    <div class="start">14.11.2008</div>
+    <div class="start">30.11.1990</div>
     <div class="start-content">
-      הגעתי לעולם
-      <img width="160" src="https://zivi-tl.surge.sh/img/img5.jpg" alt="" />
+      זה טל
+      <img width="160"
+        src="https://firebasestorage.googleapis.com/v0/b/timeline-tal.appspot.com/o/res%2Fimg38628_500x450?alt=media&token=8e71b14f-d689-4df4-9091-cc32e104aef9"
+        alt="" />
     </div>
 
   </div>
@@ -86,27 +84,27 @@
   <script type="text/javascript" src="js/jscript.js" defer></script>
   <script src="js/jQuery.js"></script>
   <script src="js/bootstrap.min.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-analytics.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-storage.js"></script>
-<script>
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  var firebaseConfig = {
-    apiKey: "AIzaSyBpy4fJ5Bm9FwFDq7PP47DCTO4ZuWqyXT4",
-    authDomain: "timeline-tal.firebaseapp.com",
-    databaseURL: "https://timeline-tal.firebaseio.com",
-    projectId: "timeline-tal",
-    storageBucket: "timeline-tal.appspot.com",
-    messagingSenderId: "603414823177",
-    appId: "1:603414823177:web:d37c8bc5da5e3effdad3d8",
-    measurementId: "G-GX0EX7LCCN"
-  };
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  firebase.analytics();
-</script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-analytics.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.1.1/firebase-storage.js"></script>
+  <script>
+    // Your web app's Firebase configuration
+    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    var firebaseConfig = {
+      apiKey: "AIzaSyBpy4fJ5Bm9FwFDq7PP47DCTO4ZuWqyXT4",
+      authDomain: "timeline-tal.firebaseapp.com",
+      databaseURL: "https://timeline-tal.firebaseio.com",
+      projectId: "timeline-tal",
+      storageBucket: "timeline-tal.appspot.com",
+      messagingSenderId: "603414823177",
+      appId: "1:603414823177:web:d37c8bc5da5e3effdad3d8",
+      measurementId: "G-GX0EX7LCCN"
+    };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    firebase.analytics();
+  </script>
 </body>
 
 

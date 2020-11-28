@@ -1,31 +1,32 @@
 const container = document.getElementById("container")
 const timeline = document.getElementById("timeline")
-const plus = document.querySelectorAll(".plus")
 const carouselInner = document.querySelector(".carousel-inner")
+const storage = firebase.storage().ref()
 
 var img = ""
 var pass = ""
 
 const DB = {
   root: "https://api.jsonbin.io",
-  key: "$2b$10$hC7JnIQX2Er/Zbnk12PAbOttAGliU8syUrrpqbN2XKig6l5P/Iha."
+  key: "$2b$10$hC7JnIQX2Er/Zbnk12PAbOttAGliU8syUrrpqbN2XKig6l5P/Iha.",
+  bin: "5fb130d53abee46e243910c9"
 }
 var data = {}
 let data_num = 0
 
-function createCarouselItem(url){
+function createCarouselItem(url, classes, plus, plusClass) {
   const carouselItem = document.createElement("div")
-  carouselItem.classList = "item"
-  carouselItem.innerHTML = 
-  `<img src="${url}" alt="...">
+  carouselItem.classList = `${classes}`
+  carouselItem.innerHTML =
+    `<img src="${url}" alt="...">
   <div class="carousel-caption">
-  <img src="buttons/plus.svg" alt="plus" class="plus" data-src="${url}">
+  <img src="${plus}" alt="plus" class="${plusClass}" data-src="${url}">
   </div>`
   return carouselItem
 }
 
 function fetchData() {
-  return fetch(`${DB.root}/b/5fbcf5b94f12502c21d7e698/latest`, {
+  return fetch(`${DB.root}/b/${DB.bin}/latest`, {
       headers: {
         "secret-key": DB.key
       }
@@ -50,7 +51,7 @@ function update() {
         content: newStory,
         image: img
       })
-      fetch(`${DB.root}/b/5fb130d53abee46e243910c9`, {
+      fetch(`${DB.root}/b/${DB.bin}`, {
           body: JSON.stringify({
             data
           }),
@@ -60,12 +61,14 @@ function update() {
             "Content-Type": "application/json"
           }
         })
-        .then(() => location.reload())
+        .then((reslog) => reslog.json()).then(reslogjson => {
+          if (reslogjson.success == true) location.reload()
+        })
 
     })
-    else{
-      alert("יש לבחור תמונה, תאריך, ולכתוב תוכן")
-    }
+  else {
+    alert("יש לבחור תמונה, תאריך, ולכתוב תוכן")
+  }
 }
 
 function getData() {
@@ -89,7 +92,7 @@ function addLifeEventToDOM(data) {
   if (data.hasOwnProperty('image'))
     prep +=
     `<div class="event-image">
-          <img width="200" src=img/${data.image} / >
+          <img width="200" src=${data.image} / >
           </div>`
   prep +=
     `</div>
@@ -109,8 +112,6 @@ function addNowToDOM(data) {
 }
 
 window.addEventListener("load", () => {
-  const storage = firebase.storage()
-  const ref = storage.ref().child("res")
   fetchData()
     .then(res => {
       data = res.data
@@ -127,27 +128,16 @@ window.addEventListener("load", () => {
 
       getData()
     })
-    ref.listAll().then(res=>res.items.forEach(
-      el=>el.getDownloadURL()
-      .then(url=>{
-        carouselInner.append(createCarouselItem(url))
-      }
-        )
-      ))
-  plus.forEach(e => {
-    e.addEventListener("click", plusToggle)
-  })
-
-  document.querySelector(".add-button").addEventListener("click", function(){
-    if (pass != "zivif"){
+  document.querySelector(".add-button").addEventListener("click", function () {
+    if (pass != "talf") {
       pass = prompt("סיסמא")
-      if (pass == "zivif"){
+      if (pass == "talf") {
+        carouselStorage()
         const addImage = document.querySelector(".add-image")
         addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
-      }
-      else alert("סיסמא שגויה")
-    }
-    else{
+      } else alert("סיסמא שגויה")
+    } else {
+      carouselStorage()
       const addImage = document.querySelector(".add-image")
       addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
     }
@@ -160,6 +150,65 @@ window.addEventListener("scroll", () => {
   }
 })
 
+function carouselStorage() {
+  const file = document.querySelector("#file")
+  const progressBar = document.querySelector("#progress")
+  const rand = `img${Math.floor(Math.random()*100000)}`
+  file.addEventListener("change", function () {
+    const up = storage.child(rand);
+    const progressq = up.put(file.files[0]).then(() => {
+      const newImageURL = storage.child(`res/${rand}_500x450`);
+      setTimeout(function () {
+        newImageURL.getDownloadURL()
+          .then(url => {
+            document.querySelector(".active").classList.remove("active")
+            carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
+            document.querySelector(".new-plus").addEventListener("click", plusToggle)
+            plus = document.querySelectorAll(".plus")
+          })
+          .catch(() => {
+            setTimeout(function () {
+              newImageURL.getDownloadURL()
+                .then(url => {
+                  document.querySelector(".active").classList.remove("active")
+                  carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
+                  document.querySelector(".new-plus").addEventListener("click", plusToggle)
+                  plus = document.querySelectorAll(".plus")
+                })
+            }, 3000)
+          })
+      }, 3000)
+      setTimeout(function () {
+        progressBar.innerText = "";
+      }, 1000)
+    })
+    // progressq.on('state_changed', function (snapshot) {
+    //   let progress = (Math.ceil((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+    //   progressBar.innerText = ('Upload is ' + progress + '% done');
+    // })
+  })
+  const ref = storage.child("res")
+  ref.listAll().then(res => {
+    res.items.forEach(
+      (el, i) => el.getDownloadURL()
+      .then(url => {
+        if (i == 0) {
+          carouselInner.append(createCarouselItem(url, "item active", "buttons/vee.svg", "plus"))
+          img = url
+          document.querySelector(".preview").src = img;
+        } else
+          carouselInner.append(createCarouselItem(url, "item", "buttons/plus.svg", "plus"))
+      }).then(() => {
+        window.plus = document.querySelectorAll(".plus")
+        plus.forEach(e => {
+          e.addEventListener("click", plusToggle)
+        })
+
+      })
+    )
+  })
+}
+
 function htmlToElement(html) {
   var template = document.createElement('template')
   html = html.trim() // Never return a text node of whitespace as the result
@@ -170,11 +219,10 @@ function htmlToElement(html) {
 function plusToggle(e) {
   plus.forEach(el => {
     if (el == e.target) {
-      if (e.target.src.includes("vee")){
+      if (e.target.src.includes("vee")) {
         e.target.src = "buttons/plus.svg"
         img = "none.svg"
-      }
-      else{
+      } else {
         e.target.src = "buttons/vee.svg"
         img = e.target.dataset.src
       }
@@ -182,13 +230,13 @@ function plusToggle(e) {
       el.src = "buttons/plus.svg"
     }
   })
-  document.querySelector(".preview").src = `img/${img}`;
+  document.querySelector(".preview").src = img;
 }
 
-document.querySelector("#newStory").addEventListener("input",function(){
+document.querySelector("#newStory").addEventListener("input", function () {
   document.querySelector(".preview-text").innerText = this.value
-  })
+})
 
-  document.querySelector("#newDate").addEventListener("change",function(){
-    document.querySelector(".preview-date").innerText = this.value
-    })
+document.querySelector("#newDate").addEventListener("change", function () {
+  document.querySelector(".preview-date").innerText = this.value
+})
