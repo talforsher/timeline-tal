@@ -38,7 +38,13 @@ h1 {
   left: 50%;
   transform: translateX(-50%);
   background: #abc9ff;
-  width: 5px;
+  width: 6px;
+}
+
+.hover::before{
+  width: 8px;
+  background: purple;
+  cursor: cell;
 }
 
 .life-event {

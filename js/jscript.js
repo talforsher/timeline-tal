@@ -2,6 +2,7 @@ const container = document.getElementById("container")
 const timeline = document.getElementById("timeline")
 const carouselInner = document.querySelector(".carousel-inner")
 const storage = firebase.storage().ref()
+const bodyWidth = document.body.clientWidth
 
 var img = ""
 var pass = ""
@@ -81,7 +82,10 @@ function getData() {
   }
 }
 
-function addLifeEventToDOM(data) {
+function addLifeEventToDOM(data = {
+  date: "",
+  content: ""
+}, y) {
   const eventItem = document.createElement("div")
   eventItem.classList.add("life-event")
   let prep = `
@@ -98,7 +102,42 @@ function addLifeEventToDOM(data) {
     `</div>
   `
   eventItem.innerHTML = prep
-  container.appendChild(eventItem)
+  if (y == null)
+    container.appendChild(eventItem)
+  else {
+    var flag = true
+    const newOne = htmlToElement(`
+    <div class="life-event new-one">
+      <div class="timeline-circle"></div>
+      <div class="content">
+    <input class="date" type="date" style="
+background: none;
+border: none;
+">
+    <p contenteditable="true">*שורה זו ניתנת לעריכה בלחיצה*</p>
+  <input type="file" name="file" id="file" style="width: inherit;">
+  <div id="progress"></div>
+<div class="event-image">
+    <img width="200" src="img/blank.svg" class="event-image-new">
+    </div>
+    <button>שגר</button>
+    </div>
+  </div>`)
+
+    for (let i = 0; i < container.children.length; i++) {
+      if (container.children[i].classList.contains("new-one"))
+        container.children[i].remove()
+
+      if (flag && (container.children[i].getBoundingClientRect().bottom + document.documentElement.scrollTop) >= y) {
+        container.insertBefore(newOne, container.children[i])
+        flag = false
+      } else {
+        if (flag)
+          container.appendChild(newOne)
+      }
+    }
+    carouselStorage()
+  }
 }
 
 function addNowToDOM(data) {
@@ -110,6 +149,26 @@ function addNowToDOM(data) {
   `
   timeline.insertAdjacentElement("afterend", nowItem)
 }
+
+timeline.addEventListener("mouseover", e => {
+  if (e.x >= timeline.clientWidth / 2 - 4 && e.x <= timeline.clientWidth / 2 + 3)
+    timeline.className = "timeline hover"
+  else
+    timeline.className = "timeline"
+})
+
+timeline.addEventListener("click", e => {
+  if (window.innerWidth > 975) {
+    if (e.x >= timeline.clientWidth / 2 - 4 && e.x <= timeline.clientWidth / 2 + 3)
+      addLifeEventToDOM({
+        date: "30/11/2020",
+        content: "ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום ממלא מקום "
+      }, e.pageY)
+  } else {
+    if (e.x > 47 && e.x < 53)
+      addLifeEventToDOM({}, e.pageY)
+  }
+})
 
 window.addEventListener("load", () => {
   fetchData()
@@ -128,20 +187,20 @@ window.addEventListener("load", () => {
 
       getData()
     })
-  document.querySelector(".add-button").addEventListener("click", function () {
-    if (pass != "talf") {
-      pass = prompt("סיסמא")
-      if (pass == "talf") {
-        carouselStorage()
-        const addImage = document.querySelector(".add-image")
-        addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
-      } else alert("סיסמא שגויה")
-    } else {
-      carouselStorage()
-      const addImage = document.querySelector(".add-image")
-      addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
-    }
-  })
+  // document.querySelector(".add-button").addEventListener("click", function () {
+  //   if (pass != "talf") {
+  //     pass = prompt("סיסמא")
+  //     if (pass == "talf") {
+  //       carouselStorage()
+  //       const addImage = document.querySelector(".add-image")
+  //       addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
+  //     } else alert("סיסמא שגויה")
+  //   } else {
+  //     carouselStorage()
+  //     const addImage = document.querySelector(".add-image")
+  //     addImage.style.display = (addImage.style.display == "none") ? "block" : "none"
+  //   }
+  // })
 })
 
 window.addEventListener("scroll", () => {
@@ -156,24 +215,31 @@ function carouselStorage() {
   const rand = `img${Math.floor(Math.random()*100000)}`
   file.addEventListener("change", function () {
     const up = storage.child(rand);
-    const progressq = up.put(file.files[0]).then(() => {
+    const progressq = up.put(file.files[0])
+    progressq.on('state_changed', function (snapshot) {
+      let progress = (Math.ceil((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+      progressBar.innerText = ('Upload is ' + progress + '% done');
+    })
+    progressq.then(() => {
       const newImageURL = storage.child(`res/${rand}_500x450`);
       setTimeout(function () {
         newImageURL.getDownloadURL()
           .then(url => {
-            document.querySelector(".active").classList.remove("active")
-            carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
-            document.querySelector(".new-plus").addEventListener("click", plusToggle)
-            plus = document.querySelectorAll(".plus")
+            document.querySelector(".event-image-new").src = url
+            // document.querySelector(".active").classList.remove("active")
+            // carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
+            // document.querySelector(".new-plus").addEventListener("click", plusToggle)
+            // plus = document.querySelectorAll(".plus")
           })
           .catch(() => {
             setTimeout(function () {
               newImageURL.getDownloadURL()
                 .then(url => {
-                  document.querySelector(".active").classList.remove("active")
-                  carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
-                  document.querySelector(".new-plus").addEventListener("click", plusToggle)
-                  plus = document.querySelectorAll(".plus")
+                  document.querySelector(".event-image-new").src = url
+                  // document.querySelector(".active").classList.remove("active")
+                  // carouselInner.append(createCarouselItem(url, "item active", "buttons/plus.svg", "plus new-plus"))
+                  // document.querySelector(".new-plus").addEventListener("click", plusToggle)
+                  // plus = document.querySelectorAll(".plus")
                 })
             }, 3000)
           })
@@ -182,31 +248,27 @@ function carouselStorage() {
         progressBar.innerText = "";
       }, 1000)
     })
-    // progressq.on('state_changed', function (snapshot) {
-    //   let progress = (Math.ceil((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
-    //   progressBar.innerText = ('Upload is ' + progress + '% done');
-    // })
   })
   const ref = storage.child("res")
-  ref.listAll().then(res => {
-    res.items.forEach(
-      (el, i) => el.getDownloadURL()
-      .then(url => {
-        if (i == 0) {
-          carouselInner.append(createCarouselItem(url, "item active", "buttons/vee.svg", "plus"))
-          img = url
-          document.querySelector(".preview").src = img;
-        } else
-          carouselInner.append(createCarouselItem(url, "item", "buttons/plus.svg", "plus"))
-      }).then(() => {
-        window.plus = document.querySelectorAll(".plus")
-        plus.forEach(e => {
-          e.addEventListener("click", plusToggle)
-        })
+  // ref.listAll().then(res => {
+  //   res.items.forEach(
+  //     (el, i) => el.getDownloadURL()
+  //     .then(url => {
+  //       if (i == 0) {
+  //         carouselInner.append(createCarouselItem(url, "item active", "buttons/vee.svg", "plus"))
+  //         img = url
+  //         document.querySelector(".preview").src = img;
+  //       } else
+  //         carouselInner.append(createCarouselItem(url, "item", "buttons/plus.svg", "plus"))
+  //     }).then(() => {
+  //       window.plus = document.querySelectorAll(".plus")
+  //       plus.forEach(e => {
+  //         e.addEventListener("click", plusToggle)
+  //       })
 
-      })
-    )
-  })
+  //     })
+  //   )
+  // })
 }
 
 function htmlToElement(html) {
@@ -233,10 +295,10 @@ function plusToggle(e) {
   document.querySelector(".preview").src = img;
 }
 
-document.querySelector("#newStory").addEventListener("input", function () {
-  document.querySelector(".preview-text").innerText = this.value
-})
+// document.querySelector("#newStory").addEventListener("input", function () {
+//   document.querySelector(".preview-text").innerText = this.value
+// })
 
-document.querySelector("#newDate").addEventListener("change", function () {
-  document.querySelector(".preview-date").innerText = this.value
-})
+// document.querySelector("#newDate").addEventListener("change", function () {
+//   document.querySelector(".preview-date").innerText = this.value
+// })
