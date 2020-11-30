@@ -119,7 +119,7 @@ background: none;
 <div class="event-image">
     <img width="200" id="newImage" src="img/blank.svg" class="event-image-new">
     </div>
-    <button>שגר</button>
+    <button onclick="update()">שגר</button>
     </div>
   </div>`)
 
