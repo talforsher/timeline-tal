@@ -4,7 +4,6 @@ const carouselInner = document.querySelector(".carousel-inner")
 const storage = firebase.storage().ref()
 const bodyWidth = document.body.clientWidth
 
-var img = ""
 var pass = ""
 
 const DB = {
@@ -43,8 +42,9 @@ function dateConvert(row) {
 
 function update() {
   const newDate = document.querySelector("#newDate").value
-  const newStory = document.querySelector("#newStory").value
-  if (newDate != "" && newStory != "" && img != "none.svg")
+  const newStory = document.querySelector("#newContent").innerText
+  const img = document.querySelector("#newImage").src
+  if (newDate != "" && newStory != "")
     data = fetchData().then(res => {
       data = res.data
       data.unshift({
@@ -110,15 +110,14 @@ function addLifeEventToDOM(data = {
     <div class="life-event new-one">
       <div class="timeline-circle"></div>
       <div class="content">
-    <input class="date" type="date" style="
+    <input id="newDate" class="date" type="date" style="
 background: none;
-border: none;
 ">
-    <p contenteditable="true">*שורה זו ניתנת לעריכה בלחיצה*</p>
+    <p id="newContent" contenteditable="true">*שורה זו ניתנת לעריכה בלחיצה*</p>
   <input type="file" name="file" id="file" style="width: inherit;">
   <div id="progress"></div>
 <div class="event-image">
-    <img width="200" src="img/blank.svg" class="event-image-new">
+    <img width="200" id="newImage" src="img/blank.svg" class="event-image-new">
     </div>
     <button>שגר</button>
     </div>
@@ -214,6 +213,7 @@ function carouselStorage() {
   const progressBar = document.querySelector("#progress")
   const rand = `img${Math.floor(Math.random()*100000)}`
   file.addEventListener("change", function () {
+    document.querySelector("#newImage").src = "img/loading.svg"
     const up = storage.child(rand);
     const progressq = up.put(file.files[0])
     progressq.on('state_changed', function (snapshot) {
